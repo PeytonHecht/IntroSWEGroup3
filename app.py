@@ -201,6 +201,26 @@ def tm_events():
     data = response.json()
     return jsonify(data), response.status_code
 
+@app.route('/api/event-details/<event_id>', methods=['GET'])
+def get_event_details(event_id):
+    tm_api_key = "hAg0tYg9wKuYyPMhX1CdWd2ZAVKJuucA"
+    base_url = "https://app.ticketmaster.com/discovery/v2/events"
+    url = f"{base_url}/{event_id}.json"
+
+    params = {
+        "apikey": tm_api_key
+    }
+
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()  # This will raise an error for a bad response
+        event_data = response.json()
+        return jsonify(event_data), response.status_code
+    except requests.exceptions.HTTPError as http_err:
+        return jsonify({"error": f"HTTP error occurred: {http_err}"}), response.status_code
+    except Exception as err:
+        return jsonify({"error": f"An unexpected error occurred: {err}"}), 500
+
 @app.route('/addtracking', methods=['POST'])
 def addtracking():
     data = request.get_json()
@@ -253,6 +273,79 @@ def deletetracking():
         conn.close()
         print("Delete successful")
         return jsonify({'message': 'Delete successful'}), 200
+    except Exception as e:
+        print("Database error:", str(e))
+        return jsonify({'error': str(e)}), 500
+@app.route('/addgoal', methods=['POST'])
+def addgoal():
+    data = request.get_json()
+    email = str(data.get('email'))
+    goalType = str(data.get('goalType'))
+    goalTime = str(data.get('goalTime'))
+    date = str(data.get('date'))
+    print("got data")
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('INSERT INTO goal (username, type, time, date) VALUES (%s, %s, %s, %s)', (email, goalType, goalTime, date))
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("Goal successful")
+        return jsonify({'message': 'Goal successful'}), 200
+    except Exception as e:
+        print("Database error:", str(e))
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/checkgoal', methods=['POST', 'GET'])
+def checkgoal():
+    print("check")
+    curr_email = request.get_json()
+    print(curr_email)
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM goal WHERE username = %s', (curr_email,))
+        data = cur.fetchall()
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("Goal successful")
+        return jsonify(data)
+    except Exception as e:
+        print("Database error:", str(e))
+        return jsonify({'error': str(e)}), 500
+@app.route('/deletegoal', methods=['POST', 'DELETE'])
+def deletegoal():
+    try:
+        curr_id = request.get_json()
+        print(curr_id)
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('DELETE FROM goal WHERE id = %s', (curr_id["id"],))
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("Delete successful")
+        return jsonify({'message': 'Delete successful'}), 200
+    except Exception as e:
+        print("Database error:", str(e))
+        return jsonify({'error': str(e)}), 500
+@app.route('/checkanalytics', methods=['POST', 'GET'])
+def checkanalytics():
+    print("check")
+    curr_email = request.get_json()
+    print(curr_email)
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM track JOIN goal ON track.username = goal.username and track.type = goal.type and track.date = goal.date WHERE track.username = %s', (curr_email,))
+        data = cur.fetchall()
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("Analytics successful")
+        return jsonify(data)
     except Exception as e:
         print("Database error:", str(e))
         return jsonify({'error': str(e)}), 500

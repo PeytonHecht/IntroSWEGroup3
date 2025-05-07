@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import logo from "../assets/SFLogo.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { 
+  faChartLine, 
+  faFlagCheckered, 
+  faChartColumn 
+} from "@fortawesome/free-solid-svg-icons";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -36,8 +42,11 @@ const Profile = () => {
   };
 
   const handleViewEvents = () => {
-    // Navigate to the events page that uses Ticketmaster API data.
     navigate("/events");
+  };
+
+  const handleReservedEvents = () => {
+    navigate("/reservations");
   };
 
   const confirmDelete = async () => {
@@ -65,7 +74,6 @@ const Profile = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header with logo and navigation buttons */}
       <div style={styles.header}>
         <img
           src={logo}
@@ -80,29 +88,54 @@ const Profile = () => {
           <button onClick={handleUpdatePassword} style={styles.navButton}>
             Update Password
           </button>
-          <button onClick={handleDeleteAccount} style={styles.deleteButton}>
-            Delete Account
-          </button>
           <button onClick={handleViewEvents} style={styles.navButton}>
             View Ticketmaster Events
           </button>
-        </div>
-      </div>
-
-      {/* Profile Section */}
-      <div style={styles.profileSection}>
-        <div style={styles.profilePicCircle}>Profile Pic</div>
-        <div style={styles.profileInfo}>
-          <h2 style={styles.name}>
-            {localStorage.getItem("email") || "User"}
-          </h2>
-          <button onClick={() => navigate("/tracking")} style={styles.primaryButton}>
-            Tracking
+          <button onClick={handleReservedEvents} style={styles.navButton}>
+            Reserved Events
+          </button>
+          <button onClick={handleDeleteAccount} style={styles.deleteButton}>
+            Delete Account
           </button>
         </div>
       </div>
 
-      {/* Delete Account Confirmation Popup */}
+      <div style={styles.profileInfoSection}>
+        <div style={styles.profilePicCircle}>
+          <span style={styles.profilePicText}>Profile Pic</span>
+        </div>
+        <h2 style={styles.name}>
+          {localStorage.getItem("email") || "User"}
+        </h2>
+      </div>
+
+      <div style={styles.actionsSection}>
+        <h3 style={styles.sectionTitle}>Your Dashboard</h3>
+        <div style={styles.actionButtons}>
+          <button
+            onClick={() => navigate("/tracking")}
+            style={styles.primaryButton}
+          >
+            <FontAwesomeIcon icon={faChartLine} style={styles.buttonIcon} />
+            <span>Tracking</span>
+          </button>
+          <button
+            onClick={() => navigate("/goal")}
+            style={styles.primaryButton}
+          >
+            <FontAwesomeIcon icon={faFlagCheckered} style={styles.buttonIcon} />
+            <span>Goals</span>
+          </button>
+          <button
+            onClick={() => navigate("/analytics")}
+            style={styles.primaryButton}
+          >
+            <FontAwesomeIcon icon={faChartColumn} style={styles.buttonIcon} />
+            <span>Analytics</span>
+          </button>
+        </div>
+      </div>
+
       {showDeletePopup && (
         <div style={styles.popup}>
           <div style={styles.popupContent}>
@@ -134,7 +167,6 @@ const styles = {
   },
   header: {
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "2rem",
   },
@@ -145,6 +177,8 @@ const styles = {
   navButtons: {
     display: "flex",
     gap: "1rem",
+    alignItems: "center",
+    marginLeft: "auto",
   },
   navButton: {
     padding: "0.75rem 1.5rem",
@@ -168,15 +202,17 @@ const styles = {
     fontWeight: "500",
     transition: "all 0.2s ease",
   },
-  profileSection: {
+  profileInfoSection: {
     display: "flex",
     alignItems: "center",
-    gap: "1.5rem",
-    marginTop: "2rem",
+    gap: "2rem",
+    marginBottom: "3rem",
+    paddingBottom: "2rem",
+    borderBottom: "1px solid #e9ecef",
   },
   profilePicCircle: {
-    width: "100px",
-    height: "100px",
+    width: "80px",
+    height: "80px",
     borderRadius: "50%",
     backgroundColor: "#e9ecef",
     display: "flex",
@@ -186,10 +222,13 @@ const styles = {
     color: "#6c757d",
     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
   },
-  profileInfo: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
+  profilePicText: {
+    fontSize: "0.8rem",
+    color: "#6c757d",
+    textAlign: "center",
+    padding: "0 5px",
+    lineHeight: "1.2",
+    wordBreak: "break-word",
   },
   name: {
     fontSize: "1.8rem",
@@ -197,16 +236,39 @@ const styles = {
     color: "#212529",
     margin: 0,
   },
+  actionsSection: {
+    marginBottom: "2rem",
+  },
+  sectionTitle: {
+    fontSize: "1.5rem",
+    fontWeight: "600",
+    color: "#495057",
+    marginBottom: "1.5rem",
+  },
+  actionButtons: {
+    display: "flex",
+    gap: "1.5rem",
+    flexWrap: "wrap",
+  },
   primaryButton: {
-    padding: "0.75rem 1.5rem",
-    borderRadius: "8px",
+    padding: "1.5rem 2rem",
+    borderRadius: "12px",
     border: "none",
     backgroundColor: "#20c997",
     color: "white",
     cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: "500",
+    fontSize: "1.1rem",
+    fontWeight: "600",
     transition: "all 0.2s ease",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "0.5rem",
+    minWidth: "150px",
+  },
+  buttonIcon: {
+    fontSize: "1.8rem",
   },
   popup: {
     position: "fixed",

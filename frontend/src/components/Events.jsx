@@ -3,22 +3,19 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Events = () => {
-  // States for events, errors, and search input.
   const [events, setEvents] = useState([]);
   const [error, setError] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState(""); // Keyword search input
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
 
-  // Default parameters for the API call.
   const countryCode = "US";
-  const radius = ""; // Optionally use if needed.
+  const radius = "";
   const unit = "miles";
   const size = "20";
 
-  // Function to fetch events with an optional keyword filter and page number.
   const fetchEvents = async (keywordParam = "", pageNum = 0) => {
     try {
       const response = await axios.get("http://127.0.0.1:5000/api/tm-events", {
@@ -32,11 +29,13 @@ const Events = () => {
         },
         withCredentials: false
       });
-      // If events data exists, update the events state.
-      if (response.data && response.data._embedded && Array.isArray(response.data._embedded.events)) {
+      if (
+        response.data &&
+        response.data._embedded &&
+        Array.isArray(response.data._embedded.events)
+      ) {
         setEvents(response.data._embedded.events);
         setError("");
-        // If the API provides page info, update currentPage and totalPages.
         if (response.data.page) {
           setCurrentPage(response.data.page.number);
           setTotalPages(response.data.page.totalPages);
@@ -57,27 +56,22 @@ const Events = () => {
     }
   };
 
-  // Initial fetch without any keyword filter.
   useEffect(() => {
     fetchEvents();
   }, []);
 
-  // Handle the search form submission.
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // When a new search is submitted, start at page 0.
     fetchEvents(searchKeyword.trim(), 0);
   };
 
-  // Handle page change via pagination controls.
   const handlePageChange = (pageNum) => {
     setCurrentPage(pageNum);
     fetchEvents(searchKeyword.trim(), pageNum);
   };
 
-  // Render a dynamic range of page buttons.
   const renderPageButtons = () => {
-    const maxButtons = 7; // Adjust how many page buttons to display at a time.
+    const maxButtons = 7;
     let start = Math.max(currentPage - Math.floor(maxButtons / 2), 0);
     let end = start + maxButtons;
     if (end > totalPages) {
@@ -103,7 +97,6 @@ const Events = () => {
     return buttons;
   };
 
-  // Back button handler to navigate to the profile page.
   const handleBack = () => {
     navigate("/profile");
   };
@@ -121,7 +114,6 @@ const Events = () => {
         </div>
       </header>
 
-      {/* Search Form */}
       <div style={styles.searchContainer}>
         <form onSubmit={handleSearchSubmit} style={styles.searchForm}>
           <input
@@ -137,10 +129,8 @@ const Events = () => {
         </form>
       </div>
 
-      {/* Display error message if any */}
       {error && <p style={styles.errorText}>{error}</p>}
 
-      {/* Display events in a table view */}
       {events.length === 0 && !error ? (
         <p style={styles.loadingText}>Loading events...</p>
       ) : (
@@ -175,14 +165,12 @@ const Events = () => {
                       <td style={styles.td}>{venue}</td>
                       <td style={styles.td}>
                         {event.url ? (
-                          <a
-                            href={event.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={styles.link}
+                          <button
+                            onClick={() => navigate(`/event-details/${event.id}`)}
+                            style={styles.linkButton}
                           >
                             View Details
-                          </a>
+                          </button>
                         ) : (
                           <span style={styles.linkDisabled}>View Details</span>
                         )}
@@ -193,7 +181,6 @@ const Events = () => {
               </tbody>
             </table>
           </div>
-          {/* Pagination Controls */}
           <div style={styles.pagination}>
             <button
               onClick={() => handlePageChange(Math.max(currentPage - 1, 0))}
@@ -331,16 +318,20 @@ const styles = {
     border: "none",
     fontSize: "1rem"
   },
-  link: {
-    textDecoration: "none",
+  linkButton: {
+    textDecoration: "underline",
     color: "#007bff",
-    fontWeight: "600"
+    fontWeight: "600",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: 0
   },
   linkDisabled: {
+    textDecoration: "none",
     color: "#aaa",
     fontWeight: "600",
-    textDecoration: "none",
-    cursor: "not-allowed"
+    opacity: 0.6
   },
   pagination: {
     display: "flex",
